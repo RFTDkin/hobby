@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>クリスマスポケモン</title>
+    <style>
+        body {
+            margin: 0;
+            background-image: url('png/chris.jpg');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            position: relative;
+            background-color: rgba(255, 255, 255, 0.7);
+            background-blend-mode: overlay;
+        }
+
+        .snow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .eggs-container {
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+            z-index: 2;
+        }
+
+        .egg {
+            width: 150px;
+            height: 150px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            margin-top: 200px;
+        }
+
+        .egg:hover {
+            transform: scale(1.1);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 3;
+        }
+
+        .modal img {
+            max-width: 200px;
+        }
+
+        .modal p {
+            font-size: 1.2em;
+            margin-top: 10px;
+        }
+        .button-circle {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #ffd32a, #ffa502);
+            top: 90%;
+            left: 95%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+        }
+        
+        .button-circle button {
+            width: 100%;
+            height: 100%;   
+            border-radius: 50%;
+            background: transparent;
+            border: none;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+            cursor: pointer;
+            padding: 10px;
+        }
+
+        /* 添加音频控制按钮样式 */
+        .audio-control {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 3;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .audio-control button {
+            background: linear-gradient(145deg,#1dd1a1, #10ac84);
+            border: none;
+            padding: 10px 20px;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+    </style>
+</head>
+<body>
+    <audio id="bgMusic" loop>
+        <source src="music/christmas.mp3" type="audio/mp3">
+    </audio>
+    <div class="audio-control">
+        <button onclick="toggleMusic()">🔊 BGM</button>
+    </div>
+    <div class="snow"></div>
+    <p style="text-align: center; font-weight: bold; color: red; font-size: 28px;position: absolute; top: 25%; left: 50%; transform: translate(-50%, -50%);">一つ好きなクリスマスエッグを選んで！</p>
+    <div class="eggs-container" id="eggsContainer"></div>
+    <div class="modal" id="modal">
+        <img id="pokemonGif" src="" alt="Pokemon">
+        <p id="message"></p>
+    </div>
+
+    <div class="button-circle">
+        <a href="index.html">
+            <button>ホームページへ</button>
+        </a>
+    </div>
+    <script>
+        const pokemons = [
+            { name: 'ピカチュウ', egg: 'png/egg1.png', gif: 'png/pika.gif' },
+            { name: 'ホゲータ', egg: 'png/egg2.png', gif: 'png/hoge.gif' },
+            { name: 'ポッチャマ', egg: 'png/egg3.png', gif: 'png/pocya.gif' }
+        ];
+
+        // 随机排序数组
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // 创建蛋
+        function createEggs() {
+            const container = document.getElementById('eggsContainer');
+            const shuffledPokemons = shuffleArray([...pokemons]);
+            
+            shuffledPokemons.forEach((pokemon, index) => {
+                const egg = document.createElement('img');
+                egg.src = pokemon.egg;
+                egg.className = 'egg';
+                egg.onclick = () => showPokemon(pokemon);
+                container.appendChild(egg);
+            });
+        }
+
+        // 显示神奇宝贝
+        function showPokemon(pokemon) {
+            const modal = document.getElementById('modal');
+            const pokemonGif = document.getElementById('pokemonGif');
+            const message = document.getElementById('message');
+            
+            pokemonGif.src = pokemon.gif;
+            message.textContent = `${pokemon.name}を獲得しました！メリークリスマス！`;
+            message.style.color = 'green';
+            modal.style.display = 'block';
+
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 3000);
+        }
+
+        // 添加下雪效果
+        function createSnowflakes() {
+            const snow = document.querySelector('.snow');
+            for (let i = 0; i < 50; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.style.position = 'absolute';
+                snowflake.style.left = Math.random() * 100 + '%';
+                snowflake.style.top = Math.random() * 100 + '%';
+                snowflake.style.width = '10px';
+                snowflake.style.height = '10px';
+                snowflake.style.background = 'white';
+                snowflake.style.borderRadius = '50%';
+                snowflake.style.animation = `fall ${Math.random() * 3 + 3}s linear infinite`;
+                snow.appendChild(snowflake);
+            }
+        }
+
+        // 添加下雪动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fall {
+                0% { transform: translateY(-100vh); }
+                100% { transform: translateY(100vh); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // 添加音乐控制函数
+        function toggleMusic() {
+            const music = document.getElementById('bgMusic');
+            if (music.paused) {
+                music.play();
+            } else {
+                music.pause();
+            }
+        }
+
+        // 初始化
+        window.onload = () => {
+            createEggs();
+            createSnowflakes();
+            // 添加自動播放音樂並設置音量
+            const music = document.getElementById('bgMusic');
+            music.volume = 0.1; // 設置音量為10%
+            music.play().catch(error => {
+                console.log("自動播放失敗，需要用戶交互才能播放音樂");
+            });
+        };
+    </script>
+</body>
+</html>

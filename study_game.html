@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>基本情報技術者試験勉強ゲーム</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a1a, #4a4a4a);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            font-family: 'Arial', sans-serif;
+            color: white;
+        }
+
+        .game-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .battle-area {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .pokemon {
+            width: 100%;
+            text-align: center;
+        }
+
+        .health-bar {
+            width: 100%;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .health-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff4757, #ff6b6b);
+            width: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .question-area {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .answers {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            background: linear-gradient(145deg, #ff6b6b, #ff4757);
+            border: none;
+            padding: 10px 20px;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        .pokemon-image {
+            width: 150px;
+            height: 150px;
+            margin: 10px auto;
+        }
+
+        .player-status {
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .button-circle {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #ff6b6b, #ff4757);
+            top: 90%;
+            left: 95%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+        }
+        
+        .button-circle button {
+            width: 100%;
+            height: 100%;   
+            border-radius: 50%;
+            background: transparent;
+            border: none;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+            cursor: pointer;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <audio id="battleMusic" loop>
+        <source src="music/battle.mp3" type="audio/mpeg">
+    </audio>
+    <div class="game-container">
+        <div class="battle-area">
+            <div class="pokemon">
+                <h2>ミュウツー</h2>
+                <div class="pokemon-image">
+                    <img src="png/mewtwo (1).gif">
+                </div>
+                <div class="health-bar">
+                    <div class="health-bar-fill" id="pokemon-health"></div>
+                </div>
+                <p>HP: <span id="pokemon-hp">100</span>/100</p>
+            </div>
+        </div>
+
+        <div class="question-area">
+            <h3>問題：</h3>
+            <p id="question">OSI参照モデルの7層のうち、トランスポート層は第何層？</p>
+            <div class="answers">
+                <button onclick="checkAnswer(1)">1. 第3層</button>
+                <button onclick="checkAnswer(2)">2. 第4層</button>
+                <button onclick="checkAnswer(3)">3. 第5層</button>
+                <button onclick="checkAnswer(4)">4. 第6層</button>
+            </div>
+        </div>
+
+        <div class="player-status">
+            <p>プレイヤーHP: <span id="player-hp">100</span>/100</p>
+        </div>
+    </div>
+
+    <div class="button-circle">
+        <a href="index.html">
+            <button>ホームページへ</button>
+        </a>
+    </div>
+
+    <script>
+        let playerHP = 100;
+        let pokemonHP = 100;
+        let currentQuestion = null;
+        let battleMusic = document.getElementById('battleMusic');
+        let questions = [];  // 将改为从JSON加载
+
+        window.onload = async function() {
+            // 加载问题数据
+            try {
+                const response = await fetch('questions.json');
+                const data = await response.json();
+                questions = data.questions;
+                loadNewQuestion();
+                createMusicControl();
+                // 添加自动播放音乐的代码
+                battleMusic.volume = 0.05;  
+                battleMusic.play().catch(function(error) {
+                    console.log("自动播放失败:", error);
+                    // 大多数浏览器需要用户交互才能播放音频
+                });
+            } catch (error) {
+                console.error('加载问题失败:', error);
+            }
+        }
+
+        function createMusicControl() {
+            const controlContainer = document.createElement('div');
+            controlContainer.style.position = 'fixed';
+            controlContainer.style.top = '20px';
+            controlContainer.style.right = '20px';
+            controlContainer.style.zIndex = '1000';
+            controlContainer.style.display = 'flex';
+            controlContainer.style.flexDirection = 'column';
+            controlContainer.style.gap = '10px';
+            controlContainer.style.alignItems = 'center';
+            
+            // 音乐开关按钮
+            const musicControl = document.createElement('button');
+            musicControl.innerHTML = '🔊 BGM';
+            
+            // 音量控制滑块
+            const volumeControl = document.createElement('input');
+            volumeControl.type = 'range';
+            volumeControl.min = '0';
+            volumeControl.max = '100';
+            volumeControl.value = '5'; // 默认音量设为30%
+            volumeControl.style.width = '100px';
+            
+            // 设置初始音量
+            battleMusic.volume = 0.05;
+            
+            musicControl.addEventListener('click', function() {
+                if (battleMusic.paused) {
+                    battleMusic.play();
+                    musicControl.innerHTML = '🔊 BGM';
+                } else {
+                    battleMusic.pause();
+                    musicControl.innerHTML = '🔈 BGM';
+                }
+            });
+            
+            volumeControl.addEventListener('input', function() {
+                battleMusic.volume = this.value / 100;
+            });
+            
+            controlContainer.appendChild(musicControl);
+            controlContainer.appendChild(volumeControl);
+            document.body.appendChild(controlContainer);
+        }
+
+        function checkAnswer(answer) {
+            const resultMessage = document.createElement('div');
+            resultMessage.style.position = 'fixed';
+            resultMessage.style.top = '50%';
+            resultMessage.style.left = '50%';
+            resultMessage.style.transform = 'translate(-50%, -50%)';
+            resultMessage.style.padding = '20px';
+            resultMessage.style.borderRadius = '10px';
+            resultMessage.style.color = 'white';
+            resultMessage.style.fontSize = '18px';
+            resultMessage.style.textAlign = 'center';
+            resultMessage.style.zIndex = '1000';
+            resultMessage.style.display = 'flex';
+            resultMessage.style.flexDirection = 'column';
+            resultMessage.style.gap = '15px';
+
+            const confirmButton = document.createElement('button');
+            confirmButton.textContent = '次へ';
+            confirmButton.style.padding = '10px 20px';
+            confirmButton.style.border = 'none';
+            confirmButton.style.borderRadius = '5px';
+            confirmButton.style.backgroundColor = 'white';
+            confirmButton.style.color = '#333';
+            confirmButton.style.cursor = 'pointer';
+            confirmButton.style.margin = '0 auto';
+            confirmButton.style.width = '120px';
+
+            if (answer === currentQuestion.correctAnswer) {
+                // 答對造成傷害
+                pokemonHP -= 20;
+                document.getElementById('pokemon-hp').textContent = pokemonHP;
+                document.getElementById('pokemon-health').style.width = pokemonHP + '%';
+                
+                resultMessage.style.background = 'rgba(46, 213, 115, 0.9)';
+                resultMessage.innerHTML = '<div>正解！ポケモンに20ダメージを与えた！</div>';
+            } else {
+                // 答錯受到傷害
+                playerHP -= 10;
+                document.getElementById('player-hp').textContent = playerHP;
+                
+                resultMessage.style.background = 'rgba(255, 71, 87, 0.9)';
+                resultMessage.innerHTML = `<div>不正解！10ダメージを受けた！<br>正解は: ${currentQuestion.options[currentQuestion.correctAnswer - 1]}</div>`;
+            }
+
+            resultMessage.appendChild(confirmButton);
+            document.body.appendChild(resultMessage);
+
+            // 禁用所有答題按鈕
+            const answerButtons = document.querySelectorAll('.answers button');
+            answerButtons.forEach(button => button.disabled = true);
+
+            confirmButton.onclick = () => {
+                document.body.removeChild(resultMessage);
+                // 重新啟用答題按鈕
+                answerButtons.forEach(button => button.disabled = false);
+
+                // 檢查勝負
+                if (pokemonHP <= 0) {
+                    alert('おめでとう！勝利した！');
+                    resetGame();
+                } else if (playerHP <= 0) {
+                    alert('げーむおーばー！');
+                    resetGame();
+                } else {
+                    // 更新問題
+                    loadNewQuestion();
+                }
+            };
+        }
+
+        function loadNewQuestion() {
+            // 隨機選擇問題
+            currentQuestion = questions[Math.floor(Math.random() * questions.length)];
+            document.getElementById('question').textContent = currentQuestion.question;
+            
+            // 更新選項按鈕的文字
+            const buttons = document.querySelectorAll('.answers button');
+            buttons.forEach((button, index) => {
+                button.textContent = `${index + 1}. ${currentQuestion.options[index]}`;
+            });
+        }
+
+        function resetGame() {
+            playerHP = 100;
+            pokemonHP = 100;
+            document.getElementById('player-hp').textContent = playerHP;
+            document.getElementById('pokemon-hp').textContent = pokemonHP;
+            document.getElementById('pokemon-health').style.width = '100%';
+            // 重置时重新播放音乐
+            battleMusic.currentTime = 0;
+            battleMusic.play();
+            loadNewQuestion();
+        }
+    </script>
+</body>
+</html> 

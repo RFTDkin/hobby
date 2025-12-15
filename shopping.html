@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ショッピング</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a1a, #4a4a4a);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            padding: 20px;
+        }
+
+        .product-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-image {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .product-title {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .product-price {
+            font-size: 1.1em;
+            color: #ff6b6b;
+            margin-bottom: 15px;
+        }
+
+        .buy-button {
+            background: linear-gradient(145deg, #ff6b6b, #ff4757);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .buy-button:hover {
+            opacity: 0.9;
+        }
+
+        .home-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(145deg, #a4b0be, #747d8c);
+            padding: 15px 30px;
+            border-radius: 25px;
+            color: white;
+            text-decoration: none;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ポケモンショップ</h1>
+        </div>
+        
+        <div class="products-grid">
+            <div class="product-card">
+                <img src="png/charizard-megax.gif" alt="商品1" class="product-image">
+                <h2 class="product-title">リザードンX</h2>
+                <p class="product-price">¥1,000,000</p>
+                <button class="buy-button">購入する</button>
+            </div>
+
+            <div class="product-card">
+                <img src="png/pidgeot-mega.gif" alt="商品2" class="product-image">
+                <h2 class="product-title">ピジョットメガ</h2>
+                <p class="product-price">¥500,000</p>
+                <button class="buy-button">購入する</button>
+            </div>
+
+            <div class="product-card">
+                <img src="png/articuno.gif" alt="商品3" class="product-image">
+                <h2 class="product-title">フリーザー</h2>
+                <p class="product-price">¥800,000</p>
+                <button class="buy-button">購入する</button>
+            </div>
+
+            <div class="product-card">
+                <img src="png/lugia.gif" alt="商品4" class="product-image">
+                <h2 class="product-title">ルギア</h2>
+                <p class="product-price">¥6,000,000</p>
+                <button class="buy-button">購入する</button>
+            </div>
+
+            <div class="product-card">
+                <img src="png/suicune.gif" alt="商品5" class="product-image">
+                <h2 class="product-title">スイクン</h2>
+                <p class="product-price">¥2,000,000</p>
+                <button class="buy-button">購入する</button>
+            </div>
+
+            <div class="product-card">
+                <img src="png/reshiram.gif" alt="商品6" class="product-image">
+                <h2 class="product-title">レシラム</h2>
+                <p class="product-price">¥8,500,000</p>
+                <button class="buy-button">購入する</button>
+            </div>
+        </div>
+    </div>
+
+    <a href="index.html" class="home-button">ホームページへ戻る</a>
+</body>
+</html>
